@@ -51,6 +51,11 @@
   }}
   ```
   
-  -Label field is multi-valued, allowing different data providers to point towards the same resource
-  -RefCount field is increased while parsing through the different data sets
+  - Label field is multi-valued, allowing different data providers to point towards the same resource
+  - RefCount field is increased while parsing through the different data sets
+  
+  ## Todo:
+  
+  - Approach generally allows multithreading, different datasets can be handled by different cores
+  - Label duplicates could be removed. However: Duplicate labels might increase stability of highly frequented resources.
   
