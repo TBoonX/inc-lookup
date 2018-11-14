@@ -54,8 +54,11 @@
   - Label field is multi-valued, allowing different data providers to point towards the same resource
   - RefCount field is increased while parsing through the different data sets
   
+  - Solr eDisMax query parser works well on multiple labels (google-like search)
   ## Todo:
   
   - Approach generally allows multithreading, different datasets can be handled by different cores
   - Label duplicates could be removed. However: Duplicate labels might increase stability of highly frequented resources.
+  
+  
   
