@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
@@ -11,6 +12,8 @@ import org.apache.solr.common.SolrInputDocument;
 public class Indexer {
 
 	private HashMap<String, Integer> refCountMap;
+
+	private HashMap<String, String> labelMap;
 	
 	private SolrClient solrClient;
 	
@@ -30,6 +33,9 @@ public class Indexer {
 		refCountMap = new HashMap<String, Integer>(1);
 		refCountMap.put("inc", 1);
 		
+		labelMap = new HashMap<String, String>(1);
+		labelMap.put("add", null);
+		
 		solrClient = new HttpSolrClient.Builder(solrUrl)
         	.withConnectionTimeout(10000)
         	.withSocketTimeout(60000)
@@ -45,7 +51,10 @@ public class Indexer {
 		
 		SolrInputDocument doc = documentPool.get();
 		doc.addField("resource", resource);
-		doc.addField("label", label);
+		
+	
+		labelMap.put("add", label);
+		doc.addField("label", labelMap);
 		
 		lastAction = "added label  '" + label + "'";
 		
@@ -86,6 +95,19 @@ public class Indexer {
 			
 			commit();
 			
+		}
+	}
+
+	public boolean clearIndex() {
+		try {
+			solrClient.deleteByQuery(coreName, "*:*");
+			solrClient.commit(coreName);
+			
+			return true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 }

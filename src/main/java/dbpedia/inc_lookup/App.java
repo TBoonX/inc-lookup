@@ -1,6 +1,8 @@
 package dbpedia.inc_lookup;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -28,13 +30,13 @@ public class App {
 
 	public static void main( String[] args ) 
 	{
-		final String sameAsUri = "http://www.w3.org/2000/01/rdf-schema#label";
+		final String[] labelUris = new String[] { "http://www.w3.org/2000/01/rdf-schema#label", "http://xmlns.com/foaf/0.1/name" };
 		final String dataSetQueryString =
 				"select distinct ?dl where { "
 						+	"?s a <http://dataid.dbpedia.org/ns/core#Dataset>. "
 						+	"?s <http://www.w3.org/ns/dcat#distribution> ?dist. "
 						+	"?dist <http://www.w3.org/ns/dcat#downloadURL> ?dl."
-						+ 	"  FILTER regex(?dist, 'label'). FILTER regex(?dist, 'enwiki'). }";
+						+ 	"FILTER regex(?dist, 'enwiki'). }";
 		
 		final String endPointUrl = "https://databus.dbpedia.org/repo/sparql";
 		final String solrUrl = "http://localhost:8983/solr/";
@@ -46,7 +48,11 @@ public class App {
 			
 			
 			
-			final Indexer indexer = new Indexer(solrUrl, coreName, 1000);
+			final Indexer indexer = new Indexer(solrUrl, coreName, 20000);
+			
+			if(!indexer.clearIndex()) {
+				return;
+			}
 			
 			
 			StreamRDF inputHandler = new StreamRDF() {
@@ -83,23 +89,28 @@ public class App {
 					String predicateURI = arg0.getPredicate().getURI();
 					
 					try {
+						
+						boolean isLabel = false;
+						
+						for(int i = 0; i < labelUris.length; i++) {
+							if(predicateURI.equals(labelUris[i])) {
+								isLabel = true;
+								break;
+							}
+						}
 					
-						if(predicateURI.equals(sameAsUri) && arg0.getObject().isLiteral()) {
+						if(isLabel && arg0.getObject().isLiteral()) {
 														
 							indexer.addLabel(arg0.getSubject().getURI(),  arg0.getObject().getLiteralValue().toString());
 												
-						} else {
+						} else if(arg0.getObject().isURI()) {
 							
 							indexer.increaseRefCount(arg0.getObject().getURI());
 						}
 					
-					} catch (SolrServerException e) {
-						// TODO Auto-generated catch block
+					} catch (Exception e) {
 						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}	
+					}
 					
 					
 				}
@@ -107,21 +118,23 @@ public class App {
 				
 			DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
 			
-			String[] downloadLinks = dataSetQuery.queryDownloadLinks();
-		
+			// String[] downloadLinks = dataSetQuery.queryDownloadLinks();
 			
-			for(String link : downloadLinks) {
+			String[] testDataPaths = new String[] { "resources/data1.nt", "resources/data2.nt" };
+			
+			for(String link : testDataPaths) {
 
 				System.out.println(">>>>> Reading from " + link);
 
 				// Skip stupid TQL, only accept ttl
-				if(!link.endsWith(".ttl.bz2")) {
-					continue;
-				}
+				//if(!link.endsWith(".ttl.bz2")) {
+				//	continue;
+				//}
 
-				BufferedInputStream in = new BufferedInputStream(new URL(link).openStream());
+				BufferedInputStream bzipIn = new BufferedInputStream(new FileInputStream(new File(link)));
+				//BufferedInputStream in = new BufferedInputStream(new URL(link).openStream());
 
-				BZip2CompressorInputStream bzipIn = new BZip2CompressorInputStream(in);
+				//BZip2CompressorInputStream bzipIn = new BZip2CompressorInputStream(in);
 
 				try 
 				{
