@@ -1,4 +1,4 @@
-package dbpedia.inc_lookup;
+package dbpedia.lookup.indexing;
 
 import org.apache.solr.common.SolrInputDocument;
 

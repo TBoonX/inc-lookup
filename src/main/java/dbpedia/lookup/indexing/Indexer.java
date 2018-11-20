@@ -1,10 +1,9 @@
-package dbpedia.inc_lookup;
+package dbpedia.lookup.indexing;
 
 import java.io.IOException;
 import java.util.HashMap;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
@@ -81,7 +80,7 @@ public class Indexer {
 		
 		solrClient.commit(coreName);
 		
-		System.out.println("Commiting after " + updateInterval + " updates.");
+		System.out.println("Commiting after " + updateCount + " updates.");
 		System.out.println("Last: " + lastAction);
 		updateCount = 0;
 		documentPool.reset();	

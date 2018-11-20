@@ -1,17 +1,11 @@
-package dbpedia.inc_lookup;
+package dbpedia.lookup.indexing;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.apache.commons.io.IOUtils;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParser;
@@ -19,7 +13,6 @@ import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.json.*;
 
 
 /**
@@ -115,12 +108,28 @@ public class App {
 					
 				}
 			};
+			
+			/*
+			 * Test Dataset Construction:
+			 * 
+			 * DATASET 2
+				CONSTRUCT { ?s ?p ?o } {
+				 ?s ?p ?o. ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o. ?s a dbo:Place.
+				} LIMIT 50000
+			 *
+			 * DATASET 1 
+				CONSTRUCT { ?s ?p ?o } {
+				 ?s ?p ?o. ?o a dbo:Place.
+				} LIMIT 100000
+
+			 * 
+			 */
 				
 			DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
 			
 			// String[] downloadLinks = dataSetQuery.queryDownloadLinks();
 			
-			String[] testDataPaths = new String[] { "resources/data1.nt", "resources/data2.nt" };
+			String[] testDataPaths = new String[] { "resources/data1.ttl", "resources/data2.ttl" };
 			
 			for(String link : testDataPaths) {
 
