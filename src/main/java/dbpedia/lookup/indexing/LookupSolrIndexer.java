@@ -8,7 +8,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
-public class Indexer {
+public class LookupSolrIndexer implements ILookupIndexer {
 
 	private HashMap<String, Integer> refCountMap;
 
@@ -26,7 +26,7 @@ public class Indexer {
 
 	private String lastAction;
 
-	public Indexer(String solrUrl, String coreName, int updateInterval) {
+	public LookupSolrIndexer(String solrUrl, String coreName, int updateInterval) {
 		
 		documentPool = new SolrDocumentPool(updateInterval);
 		refCountMap = new HashMap<String, Integer>(1);
@@ -46,7 +46,7 @@ public class Indexer {
 		
 	}
 	
-	public void addLabel(String resource, String label) throws SolrServerException, IOException {
+	public void addLabel(String resource, String label) {
 		
 		SolrInputDocument doc = documentPool.get();
 		doc.addField("resource", resource);
@@ -57,28 +57,55 @@ public class Indexer {
 		
 		lastAction = "added label  '" + label + "'";
 		
-		solrClient.add(coreName, doc);
+		try {
+			solrClient.add(coreName, doc);
+			update();
+		} catch (SolrServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		update();
+		
 		
 		
 	}
 	
-	public void increaseRefCount(String resource) throws SolrServerException, IOException {
+	public void increaseRefCount(String resource) {
 		
 		SolrInputDocument doc = documentPool.get();
 		doc.addField("resource", resource);
 		doc.addField("refCount", refCountMap);
 		
-		solrClient.add(coreName, doc);
+		try {
+			solrClient.add(coreName, doc);
 		
-		lastAction = "increased refCount of " + resource;
-		update();
+		
+			lastAction = "increased refCount of " + resource;
+			update();
+		
+		} catch (SolrServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public void commit() throws SolrServerException, IOException {
+	public void commit() {
 		
-		solrClient.commit(coreName);
+		try {
+			solrClient.commit(coreName);
+		} catch (SolrServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		System.out.println("Commiting after " + updateCount + " updates.");
 		System.out.println("Last: " + lastAction);

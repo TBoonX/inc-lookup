@@ -41,7 +41,7 @@ public class App {
 			
 			
 			
-			final Indexer indexer = new Indexer(solrUrl, coreName, 20000);
+			final LookupSolrIndexer indexer = new LookupSolrIndexer(solrUrl, coreName, 20000);
 			
 			if(!indexer.clearIndex()) {
 				return;
