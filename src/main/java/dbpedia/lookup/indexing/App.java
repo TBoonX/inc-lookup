@@ -41,7 +41,7 @@ public class App {
 			
 			
 			
-			final LookupSolrIndexer indexer = new LookupSolrIndexer(solrUrl, coreName, 20000);
+			final ILookupIndexer indexer = new LookupSolrIndexer(solrUrl, coreName, 20000);
 			
 			if(!indexer.clearIndex()) {
 				return;
@@ -156,9 +156,6 @@ public class App {
 					indexer.commit();
 
 				} catch(RiotException e) {
-					e.printStackTrace();
-				} catch (SolrServerException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

@@ -6,8 +6,13 @@ import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -63,72 +68,38 @@ public class LookupLuceneIndexer implements ILookupIndexer {
 	
 	public void addLabel(String resource, String label) {
 		
-		SolrInputDocument doc = documentPool.get();
-		doc.addField("resource", resource);
-		
-	
-		labelMap.put("add", label);
-		doc.addField("label", labelMap);
-		
-		lastAction = "added label  '" + label + "'";
-		
+		Document doc = new Document();
+		doc.add(new TextField("lbal", label, Field.Store.YES));
+				
 		try {
-			solrClient.add(coreName, doc);
-			update();
-		} catch (SolrServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			writer.updateDocument(new Term("resource", resource), doc);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
-		
+
+	
+		update();		
 	}
 	
 	public void increaseRefCount(String resource) {
 		
-		SolrInputDocument doc = documentPool.get();
-		doc.addField("resource", resource);
-		doc.addField("refCount", refCountMap);
 		
-		try {
-			solrClient.add(coreName, doc);
-		
-		
-			lastAction = "increased refCount of " + resource;
-			update();
-		
-		} catch (SolrServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		update();		
 	}
 	
 	public void commit() {
 		
+		
 		try {
-			solrClient.commit(coreName);
-		} catch (SolrServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			writer.commit();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		System.out.println("Commiting after " + updateCount + " updates.");
-		System.out.println("Last: " + lastAction);
-		updateCount = 0;
-		documentPool.reset();	
 	}
 	
-	private void update() throws SolrServerException, IOException {
+	private void update() {
 		
 		updateCount++;
 		
@@ -140,15 +111,15 @@ public class LookupLuceneIndexer implements ILookupIndexer {
 	}
 
 	public boolean clearIndex() {
+		
 		try {
-			solrClient.deleteByQuery(coreName, "*:*");
-			solrClient.commit(coreName);
-			
+			writer.deleteAll();
 			return true;
-			
-		} catch (Exception e) {
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
 		}
+		
+		return false;
 	}
 }
