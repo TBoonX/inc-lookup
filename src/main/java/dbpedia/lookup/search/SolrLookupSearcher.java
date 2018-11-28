@@ -11,13 +11,13 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.json.JSONObject;
 
-public class LookupSearcher {
+public class SolrLookupSearcher implements ILookupSearcher {
 
 	 
 	private HttpSolrClient solrClient;
 	private String coreName;
 
-	public LookupSearcher(String solrUrl, String coreName) {
+	public SolrLookupSearcher(String solrUrl, String coreName) {
 		
 		solrClient = new HttpSolrClient.Builder(solrUrl)
 	        	.withConnectionTimeout(10000)
@@ -40,7 +40,7 @@ public class LookupSearcher {
 		
 		SolrQuery solrQuery = new SolrQuery();
 		solrQuery.set("q", query + "~");
-		solrQuery.set("defType", "edismax");
+		solrQuery.set("defType", "edismILookupSearcherax");
 		solrQuery.set("qf", "label");
 		
 		QueryResponse respone = solrClient.query(coreName, solrQuery);
@@ -48,6 +48,7 @@ public class LookupSearcher {
 		
 		JSONObject returnResults = new JSONObject();
 		HashMap<Integer, Object> solrDocMap = new HashMap<Integer, Object>();
+		
 		int counter = 1;
 		for(Map singleDoc : list)
 		{

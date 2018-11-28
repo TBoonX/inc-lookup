@@ -10,7 +10,8 @@ import javax.ws.rs.ext.Providers;
 
 import org.apache.solr.client.solrj.SolrServerException;
 
-import dbpedia.lookup.search.LookupSearcher;
+import dbpedia.lookup.search.ILookupSearcher;
+import dbpedia.lookup.search.SolrLookupSearcher;
 
 @Path( "search" )
 public class LookupResource
@@ -20,12 +21,12 @@ public class LookupResource
 	@Produces( MediaType.APPLICATION_JSON )
 	public String message(@QueryParam("query") String query, @Context Providers providers)
 	{
-		ContextResolver<LookupSearcher> resolver = providers.getContextResolver(LookupSearcher.class,  MediaType.WILDCARD_TYPE);
-		LookupSearcher searcher = resolver.getContext(LookupSearcher.class);
+		ContextResolver<ILookupSearcher> resolver = providers.getContextResolver(ILookupSearcher.class,  MediaType.WILDCARD_TYPE);
+		ILookupSearcher searcher = resolver.getContext(ILookupSearcher.class);
 		
 		try {
 			
-			return searcher.labelEdismax(query);
+			return searcher.search(query);
 			
 		} catch (SolrServerException e) {
 			// TODO Auto-generated catch block

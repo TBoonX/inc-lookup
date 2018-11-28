@@ -2,15 +2,15 @@ package dbpedia.lookup.search;
 
 import javax.ws.rs.ext.ContextResolver;
 
-public class LookupSearcherResolver implements ContextResolver<LookupSearcher> {
+public class LookupSearcherResolver implements ContextResolver<ILookupSearcher> {
 
-	private LookupSearcher searcher;
+	private ILookupSearcher searcher;
 	
-	public LookupSearcherResolver(LookupSearcher searcher) {
+	public LookupSearcherResolver(ILookupSearcher searcher) {
 		this.searcher = searcher;
 		
 	}
-	public LookupSearcher getContext(Class<?> arg0) {
+	public ILookupSearcher getContext(Class<?> arg0) {
 		return searcher;
 	}	
 	

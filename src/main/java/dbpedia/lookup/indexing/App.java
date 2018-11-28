@@ -41,7 +41,7 @@ public class App {
 			
 			
 			
-			final ILookupIndexer indexer = new LookupSolrIndexer(solrUrl, coreName, 20000);
+			final ILookupIndexer indexer = new LookupLuceneIndexer("tmp", 1000); //solrUrl, coreName, 20000);
 			
 			if(!indexer.clearIndex()) {
 				return;
