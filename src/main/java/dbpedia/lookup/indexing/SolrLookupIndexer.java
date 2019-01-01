@@ -8,7 +8,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
-public class LookupSolrIndexer implements ILookupIndexer {
+public class SolrLookupIndexer implements ILookupIndexer {
 
 	private HashMap<String, Integer> refCountMap;
 
@@ -26,7 +26,7 @@ public class LookupSolrIndexer implements ILookupIndexer {
 
 	private String lastAction;
 
-	public LookupSolrIndexer(String solrUrl, String coreName, int updateInterval) {
+	public SolrLookupIndexer(String solrUrl, String coreName, int updateInterval) {
 		
 		documentPool = new SolrDocumentPool(updateInterval);
 		refCountMap = new HashMap<String, Integer>(1);

@@ -4,15 +4,14 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.solr.client.solrj.SolrServerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -23,7 +22,11 @@ public class App {
 
 	public static void main( String[] args ) 
 	{
+		
+		Logger logger = LoggerFactory.getLogger(App.class);
+		
 		final String[] labelUris = new String[] { "http://www.w3.org/2000/01/rdf-schema#label", "http://xmlns.com/foaf/0.1/name" };
+		/*
 		final String dataSetQueryString =
 				"select distinct ?dl where { "
 						+	"?s a <http://dataid.dbpedia.org/ns/core#Dataset>. "
@@ -32,16 +35,13 @@ public class App {
 						+ 	"FILTER regex(?dist, 'enwiki'). }";
 		
 		final String endPointUrl = "https://databus.dbpedia.org/repo/sparql";
-		final String solrUrl = "http://localhost:8983/solr/";
-		final String coreName = "fusion-labels";
-		
-		
+		*/
 		
 		try {
 			
 			
 			
-			final ILookupIndexer indexer = new LookupLuceneIndexer("tmp", 1000); //solrUrl, coreName, 20000);
+			final ILookupIndexer indexer = new LuceneLookupIndexer("tmp", 100000); //solrUrl, coreName, 20000);
 			
 			if(!indexer.clearIndex()) {
 				return;
@@ -125,7 +125,7 @@ public class App {
 			 * 
 			 */
 				
-			DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
+			// DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
 			
 			// String[] downloadLinks = dataSetQuery.queryDownloadLinks();
 			
@@ -133,7 +133,7 @@ public class App {
 			
 			for(String link : testDataPaths) {
 
-				System.out.println(">>>>> Reading from " + link);
+				logger.debug(">>>>> Reading from " + link);
 
 				// Skip stupid TQL, only accept ttl
 				//if(!link.endsWith(".ttl.bz2")) {
@@ -153,19 +153,15 @@ public class App {
 					.parse(inputHandler);	
 					
 
-					indexer.commit();
 
 				} catch(RiotException e) {
 					e.printStackTrace();
 				}
 			}
 			
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+
+			indexer.commit();
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

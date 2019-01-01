@@ -8,10 +8,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
 
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import dbpedia.lookup.search.ILookupSearcher;
-import dbpedia.lookup.search.SolrLookupSearcher;
 
 @Path( "search" )
 public class LookupResource
@@ -19,23 +19,26 @@ public class LookupResource
 	
 	@GET
 	@Produces( MediaType.APPLICATION_JSON )
-	public String message(@QueryParam("query") String query, @Context Providers providers)
+	public String message(@QueryParam("query") String query, @QueryParam("maxHits") int maxHits, @Context Providers providers)
 	{
 		ContextResolver<ILookupSearcher> resolver = providers.getContextResolver(ILookupSearcher.class,  MediaType.WILDCARD_TYPE);
 		ILookupSearcher searcher = resolver.getContext(ILookupSearcher.class);
 		
 		try {
 			
-			return searcher.search(query);
+			if(maxHits == 0) {
+				maxHits = 1000;
+			}
+			
+			return searcher.search(query, maxHits);
 			
 		} catch (SolrServerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return e.getMessage();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return e.getMessage();
+		} catch (ParseException e) {
+			return e.getMessage();
 		}
 		
-		return "ERR";
 	}
 }

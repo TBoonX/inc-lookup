@@ -28,7 +28,7 @@ public class SolrLookupSearcher implements ILookupSearcher {
 		this.coreName = coreName;
 	}
 	
-	public String search(String query) {
+	public String search(String query, int maxHits) {
 		
 		SolrQuery solrQuery = new SolrQuery();
 		solrQuery.setQuery(query);
@@ -50,7 +50,8 @@ public class SolrLookupSearcher implements ILookupSearcher {
 		HashMap<Integer, Object> solrDocMap = new HashMap<Integer, Object>();
 		
 		int counter = 1;
-		for(Map singleDoc : list)
+		
+		for(@SuppressWarnings("rawtypes") Map singleDoc : list)
 		{
 		  solrDocMap.put(counter, new JSONObject(singleDoc));
 		  counter++;

@@ -2,16 +2,14 @@ package dbpedia.lookup.server;
 
 import java.io.IOException;
 import java.net.URI;
+import java.text.ParseException;
 import java.util.Scanner;
-
-import javax.swing.JOptionPane;
 
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.sun.net.httpserver.HttpServer;
 
-import dbpedia.lookup.search.SolrLookupSearcher;
 import dbpedia.lookup.search.ILookupSearcher;
 import dbpedia.lookup.search.LookupSearcherResolver;
 import dbpedia.lookup.search.LuceneLookupSearcher;
@@ -21,11 +19,8 @@ public class Server
 {
     private static String exitCode = "exit";
 
-	public static void main( String[] args ) throws IOException
+	public static void main( String[] args ) throws IOException, ParseException
     {
-    	final String solrUrl = "http://localhost:8983/solr/";
-		final String coreName = "fusion-labels";
-		
     	ILookupSearcher searcher = new LuceneLookupSearcher("tmp");  // new SolrLookupSearcher(solrUrl, coreName);
         
     	ResourceConfig rc = new ResourceConfig()
@@ -37,11 +32,11 @@ public class Server
 	    URI.create( "http://localhost:8080/api" ), rc );
     	System.out.println("Lookup Service running.");
     	
+    	Scanner scan = new Scanner(System.in);
     	
     	while(true) {
     		
     		
-    		Scanner scan = new Scanner(System.in);
     		String input = scan.nextLine();
     		
     		
@@ -53,8 +48,9 @@ public class Server
     		}
     	}
     	
+    	scan.close();
+		
 		server.stop( 0 );
 		System.out.println("Lookup Service stopped.");
-		
-    }
+	}
 }
