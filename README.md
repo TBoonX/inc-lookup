@@ -218,3 +218,5 @@
   
   
   
+## mvn java:exec
+```  mvn exec:java -Dexec.mainClass="dbpedia.lookup.indexing.App" ````
