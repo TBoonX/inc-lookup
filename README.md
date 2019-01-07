@@ -219,4 +219,12 @@
   
   
 ## mvn java:exec
-```  mvn exec:java -Dexec.mainClass="dbpedia.lookup.indexing.App" ````
+
+
+``` 
+mvn exec:java -Dexec.mainClass="dbpedia.lookup.indexing.App" 
+
+mvn exec:java -Dexec.mainClass="dbpedia.lookup.server.Server" 
+
+
+````
