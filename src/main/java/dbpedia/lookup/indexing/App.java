@@ -67,7 +67,7 @@ public class App {
 		int cacheSize = indexConfig.getInt(CFG_KEY_CACHE_SIZE);
 		JSONArray indexFields = indexConfig.getJSONArray(CFG_KEY_FIELDS);
 
-		System.out.println(dataSetQueryString);
+		System.out.println("DATASET QUERY: " + dataSetQueryString);
 
 		indexResources = new ArrayList<IndexResource>();
 
