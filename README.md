@@ -216,6 +216,10 @@
   - Approach generally allows multithreading, different datasets can be handled by different cores
   - Label duplicates could be removed. However: Duplicate labels might increase stability of highly frequented resources.
   
+
+## server URL
+http://localhost:8081/api/search?query=Billlo
+(check port in code)
   
   
 ## mvn java:exec
