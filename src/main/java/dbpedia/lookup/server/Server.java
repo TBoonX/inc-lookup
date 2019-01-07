@@ -10,9 +10,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.sun.net.httpserver.HttpServer;
 
-import dbpedia.lookup.search.ILookupSearcher;
-import dbpedia.lookup.search.LookupSearcherResolver;
-import dbpedia.lookup.search.LuceneLookupSearcher;
+import dbpedia.lookup.indexing.ILookupSearcher;
+import dbpedia.lookup.lucene.LuceneLookupSearcher;
 
 
 public class Server 

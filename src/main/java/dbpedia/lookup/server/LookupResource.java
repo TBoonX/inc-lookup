@@ -11,7 +11,7 @@ import javax.ws.rs.ext.Providers;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.solr.client.solrj.SolrServerException;
 
-import dbpedia.lookup.search.ILookupSearcher;
+import dbpedia.lookup.indexing.ILookupSearcher;
 
 @Path( "search" )
 public class LookupResource
@@ -19,7 +19,8 @@ public class LookupResource
 	
 	@GET
 	@Produces( MediaType.APPLICATION_JSON )
-	public String message(@QueryParam("query") String query, @QueryParam("maxHits") int maxHits, @Context Providers providers)
+	public String message(@QueryParam("query") String query, @QueryParam("maxHits") int maxHits,
+			@QueryParam("format") String format, @Context Providers providers)
 	{
 		ContextResolver<ILookupSearcher> resolver = providers.getContextResolver(ILookupSearcher.class,  MediaType.WILDCARD_TYPE);
 		ILookupSearcher searcher = resolver.getContext(ILookupSearcher.class);

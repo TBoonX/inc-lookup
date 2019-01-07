@@ -1,0 +1,30 @@
+{
+	"data" : {
+		"endPointUrl" : "https://databus.dbpedia.org/repo/sparql",
+		"dataQuery" : [
+			"select distinct ?dl where {",
+			"?s a <http://dataid.dbpedia.org/ns/core#Dataset>.",
+			"?s <http://www.w3.org/ns/dcat#distribution> ?dist.",
+			"?dist <http://www.w3.org/ns/dcat#downloadURL> ?dl.",
+			"FILTER regex(?dist, 'labels-2018.11.20_enwiki'). }"
+		]
+	},
+
+	"index" : {
+		"path" : "lookupIndex",
+		"cacheSize" : 1000000,
+		"commitInterval" : 100000,
+		"fields" : [
+			{ "name" : "label", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#label", "http://xmlns.com/foaf/0.1/name" ] },
+			{ "name" : "description", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#comment", "http://dbpedia.org/ontology/abstract" ] }
+		]
+	},
+
+	"search" : {
+		"maxResults" : 1000,
+		"fields" : [
+			{ "name" : "label", "weight" : 1.0 },
+			{ "name" : "description", "weight" : 0.2 }
+		]
+	}
+}

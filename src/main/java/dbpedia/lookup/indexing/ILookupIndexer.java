@@ -1,9 +1,10 @@
 package dbpedia.lookup.indexing;
 
+import java.io.IOException;
+
 public interface ILookupIndexer {
 
-	
-	void addLabel(String resource, String label);
+	void indexField(String key, String resource, String text) throws IOException;
 	
 	void increaseRefCount(String resource);
 	

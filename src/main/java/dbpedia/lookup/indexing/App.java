@@ -1,47 +1,87 @@
 package dbpedia.lookup.indexing;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.sparql.core.Quad;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import dbpedia.lookup.lucene.LuceneLookupIndexer;
 
 
-/**
- * Hello world!
- *
- */
+
 public class App {
 
-	public static void main( String[] args ) 
+	private static final String CFG_KEY_INDEX = "index";
+
+	private static final String CFG_KEY_DATA = "data";
+
+	private static final String CFG_KEY_COMMIT_INTERVAL = "commitInterval";
+	
+	private static final String CFG_KEY_CACHE_SIZE = "cacheSize";
+	
+	private static final String CFG_KEY_DATA_QUERY = "dataQuery";
+	
+	private static final String CFG_KEY_ENDPOINT_URL = "endPointUrl";
+	
+	private static final String CFG_KEY_PATH = "path";
+	
+	private static final String CFG_KEY_FIELDS = "fields";
+	
+	private static final String CFG_KEY_NAME = "name";
+	
+	private static final String CFG_KEY_URIS = "uris";
+
+	private static ArrayList<IndexResource> indexResources;
+	
+	public static void main( String[] args ) throws IOException 
 	{
 		
-		Logger logger = LoggerFactory.getLogger(App.class);
+		String configString = new String(Files.readAllBytes(Paths.get("resources/index_config.json")));
+		JSONObject config = new JSONObject(configString);
+		JSONObject indexConfig = config.getJSONObject(CFG_KEY_INDEX);
+		JSONObject dataConfig = config.getJSONObject(CFG_KEY_DATA);
 		
-		final String[] labelUris = new String[] { "http://www.w3.org/2000/01/rdf-schema#label", "http://xmlns.com/foaf/0.1/name" };
-		/*
-		final String dataSetQueryString =
-				"select distinct ?dl where { "
-						+	"?s a <http://dataid.dbpedia.org/ns/core#Dataset>. "
-						+	"?s <http://www.w3.org/ns/dcat#distribution> ?dist. "
-						+	"?dist <http://www.w3.org/ns/dcat#downloadURL> ?dl."
-						+ 	"FILTER regex(?dist, 'enwiki'). }";
+		String dataSetQueryString = dataConfig.getJSONArray(CFG_KEY_DATA_QUERY).join("\n");
+		String endPointUrl = dataConfig.getString(CFG_KEY_ENDPOINT_URL);
 		
-		final String endPointUrl = "https://databus.dbpedia.org/repo/sparql";
-		*/
+		String indexPath = indexConfig.getString(CFG_KEY_PATH);
+		int commitInterval = indexConfig.getInt(CFG_KEY_COMMIT_INTERVAL);
+		int cacheSize = indexConfig.getInt(CFG_KEY_CACHE_SIZE);
+		JSONArray indexFields = indexConfig.getJSONArray(CFG_KEY_FIELDS);
+		
+		indexResources = new ArrayList<IndexResource>();
+		
+		for(int i = 0; i < indexFields.length(); i++) {
+			
+			JSONObject field = indexFields.getJSONObject(i);
+			JSONArray uris = field.getJSONArray(CFG_KEY_URIS);
+			
+			IndexResource indexResource = new IndexResource();
+			indexResource.key = field.getString(CFG_KEY_NAME);
+			indexResource.uris = new String[uris.length()];
+			
+			for(int j = 0; j < uris.length(); j++) {
+				indexResource.uris[j] = uris.getString(j);
+			}
+			
+			indexResources.add(indexResource);
+		}
+		
 		
 		try {
 			
-			
-			
-			final ILookupIndexer indexer = new LuceneLookupIndexer("tmp", 100000); //solrUrl, coreName, 20000);
+			final ILookupIndexer indexer = new LuceneLookupIndexer(indexPath, commitInterval, cacheSize);
 			
 			if(!indexer.clearIndex()) {
 				return;
@@ -83,18 +123,26 @@ public class App {
 					
 					try {
 						
-						boolean isLabel = false;
+						IndexResource tripleIndexResource = null;
 						
-						for(int i = 0; i < labelUris.length; i++) {
-							if(predicateURI.equals(labelUris[i])) {
-								isLabel = true;
-								break;
+						if(arg0.getObject().isLiteral()) {
+							for(int i = 0; i < indexResources.size(); i++) {
+								
+								IndexResource indexResource = indexResources.get(i);
+								
+								for(int j = 0; j < indexResource.uris.length; j++) {
+	
+									if(predicateURI.equals(indexResource.uris[j])) {
+										tripleIndexResource = indexResource;
+										break;
+									}
+								}
 							}
 						}
 					
-						if(isLabel && arg0.getObject().isLiteral()) {
+						if(tripleIndexResource != null) {
 														
-							indexer.addLabel(arg0.getSubject().getURI(),  arg0.getObject().getLiteralValue().toString());
+							indexer.indexField(tripleIndexResource.key, arg0.getSubject().getURI(),  arg0.getObject().getLiteralValue().toString());
 												
 						} else if(arg0.getObject().isURI()) {
 							
@@ -104,8 +152,6 @@ public class App {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					
-					
 				}
 			};
 			
@@ -125,25 +171,22 @@ public class App {
 			 * 
 			 */
 				
-			// DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
+			DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
 			
-			// String[] downloadLinks = dataSetQuery.queryDownloadLinks();
+			String[] downloadLinks = dataSetQuery.queryDownloadLinks();
 			
-			String[] testDataPaths = new String[] { "resources/data1.ttl", "resources/data2.ttl" };
-			
-			for(String link : testDataPaths) {
+			for(String link : downloadLinks) {
 
-				logger.debug(">>>>> Reading from " + link);
+				System.out.println(">>>>> Reading from " + link);
 
 				// Skip stupid TQL, only accept ttl
-				//if(!link.endsWith(".ttl.bz2")) {
-				//	continue;
-				//}
+				if(!link.endsWith(".ttl.bz2")) {
+					continue;
+				}
 
-				BufferedInputStream bzipIn = new BufferedInputStream(new FileInputStream(new File(link)));
-				//BufferedInputStream in = new BufferedInputStream(new URL(link).openStream());
+				BufferedInputStream in = new BufferedInputStream(new URL(link).openStream());
 
-				//BZip2CompressorInputStream bzipIn = new BZip2CompressorInputStream(in);
+				BZip2CompressorInputStream bzipIn = new BZip2CompressorInputStream(in);
 
 				try 
 				{
@@ -170,4 +213,5 @@ public class App {
 		System.out.println("Done.");
 
 	}
+	
 }
