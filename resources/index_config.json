@@ -2,13 +2,9 @@
 	"data" : {
 		"endPointUrl" : "https://databus.dbpedia.org/repo/sparql",
 		"dataQuery" : [
-			"select distinct ?dl where {",
-			"?s a <http://dataid.dbpedia.org/ns/core#Dataset>.",
-			"?s <http://www.w3.org/ns/dcat#distribution> ?dist.",
-			"?dist <http://www.w3.org/ns/dcat#downloadURL> ?dl.",
-			"FILTER regex(?dist, 'labels-2018.11.20_enwiki'). }"
+			"prefix dataid: <http://dataid.dbpedia.org/ns/core#> select distinct ?dl where {?s a <http://dataid.dbpedia.org/ns/core#Dataset>.?s <http://www.w3.org/ns/dcat#distribution> ?dist.?dist <http://www.w3.org/ns/dcat#downloadURL> ?dl.?s dataid:artifact <https://databus.dbpedia.org/dbpedia/fusion/labels> .}"
 		],
-		"filePath" : "catalog.all.ttl"
+		"filePath" : ""
 	},
 
 	"index" : {
@@ -16,16 +12,15 @@
 		"cacheSize" : 1000000,
 		"commitInterval" : 100000,
 		"fields" : [
-			{ "name" : "label", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#label", "http://purl.org/dc/terms/title" ] },
-			{ "name" : "description", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#comment", "http://purl.org/dc/terms/description" ] }
+			{ "name" : "label", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#label", "http://xmlns.com/foaf/0.1/name" ] }
+			
 		]
 	},
 
 	"search" : {
 		"maxResults" : 1000,
 		"fields" : [
-			{ "name" : "label", "weight" : 1.0 },
-			{ "name" : "description", "weight" : 0.2 }
+			{ "name" : "label", "weight" : 1.0 }
 		]
 	}
 }
