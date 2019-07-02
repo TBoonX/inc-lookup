@@ -37,8 +37,6 @@ public class App {
 
 	private static final String CFG_KEY_ENDPOINT_URL = "endPointUrl";
 
-	private static final String CFG_KEY_FILE_PATH = "filePath";
-
 	private static final String CFG_KEY_PATH = "path";
 
 	private static final String CFG_KEY_FIELDS = "fields";
@@ -66,7 +64,6 @@ public class App {
 
 		String dataSetQueryString = sb.toString();
 		String endPointUrl = dataConfig.getString(CFG_KEY_ENDPOINT_URL);
-		String filePath = dataConfig.getString(CFG_KEY_FILE_PATH);
 
 		String indexPath = indexConfig.getString(CFG_KEY_PATH);
 		int commitInterval = indexConfig.getInt(CFG_KEY_COMMIT_INTERVAL);
@@ -74,7 +71,6 @@ public class App {
 		JSONArray indexFields = indexConfig.getJSONArray(CFG_KEY_FIELDS);
 
 		System.out.println("DATASET QUERY: " + dataSetQueryString);
-		System.out.println("FILE PATH: " + filePath);
 
 		indexResources = new ArrayList<IndexResource>();
 
@@ -172,16 +168,44 @@ public class App {
 			};
 			
 			
-			// If there is a file given then use it instead
-			if (filePath != null && !filePath.isEmpty()) {
-				File initialFile = new File(filePath);
-			    InputStream targetStream = new FileInputStream(initialFile);
-				BufferedInputStream in = new BufferedInputStream(targetStream);
+			
+			/*
+			 * Test Dataset Construction:
+			 *
+			 * DATASET 2
+				CONSTRUCT { ?s ?p ?o } {
+				 ?s ?p ?o. ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o. ?s a dbo:Place.
+				} LIMIT 50000
+			 *
+			 * DATASET 1
+				CONSTRUCT { ?s ?p ?o } {
+				 ?s ?p ?o. ?o a dbo:Place.
+				} LIMIT 100000
+
+			 *
+			 */
+
+			DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
+
+			String[] downloadLinks = dataSetQuery.queryDownloadLinks();
+
+			for(String link : downloadLinks) {
+
+				System.out.println(">>>>> Reading from " + link);
+
+				// Skip stupid TQL, only accept ttl
+				if(!link.endsWith(".ttl.bz2")) {
+					continue;
+				}
+
+				BufferedInputStream in = new BufferedInputStream(new URL(link).openStream());
+
+				BZip2CompressorInputStream bzipIn = new BZip2CompressorInputStream(in);
 
 				try
 				{
 					RDFParser.create()
-					.source(in)
+					.source(bzipIn)
 					.lang(RDFLanguages.TTL)
 					.parse(inputHandler);
 
@@ -189,54 +213,6 @@ public class App {
 
 				} catch(RiotException e) {
 					e.printStackTrace();
-				}
-			}
-			else {
-				/*
-				 * Test Dataset Construction:
-				 *
-				 * DATASET 2
-					CONSTRUCT { ?s ?p ?o } {
-					 ?s ?p ?o. ?s <http://www.w3.org/2000/01/rdf-schema#label> ?o. ?s a dbo:Place.
-					} LIMIT 50000
-				 *
-				 * DATASET 1
-					CONSTRUCT { ?s ?p ?o } {
-					 ?s ?p ?o. ?o a dbo:Place.
-					} LIMIT 100000
-
-				 *
-				 */
-
-				DataSetQuery dataSetQuery = new DataSetQuery(endPointUrl, dataSetQueryString);
-
-				String[] downloadLinks = dataSetQuery.queryDownloadLinks();
-
-				for(String link : downloadLinks) {
-
-					System.out.println(">>>>> Reading from " + link);
-
-					// Skip stupid TQL, only accept ttl
-					if(!link.endsWith(".ttl.bz2")) {
-						continue;
-					}
-
-					BufferedInputStream in = new BufferedInputStream(new URL(link).openStream());
-
-					BZip2CompressorInputStream bzipIn = new BZip2CompressorInputStream(in);
-
-					try
-					{
-						RDFParser.create()
-						.source(bzipIn)
-						.lang(RDFLanguages.TTL)
-						.parse(inputHandler);
-
-
-
-					} catch(RiotException e) {
-						e.printStackTrace();
-					}
 				}
 			}
 

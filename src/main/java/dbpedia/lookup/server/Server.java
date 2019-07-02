@@ -20,7 +20,7 @@ public class Server
 
 	public static void main( String[] args ) throws IOException, ParseException
     {
-    	ILookupSearcher searcher = new LuceneLookupSearcher("tmp");  // new SolrLookupSearcher(solrUrl, coreName);
+    	ILookupSearcher searcher = new LuceneLookupSearcher("lookupIndex");  // new SolrLookupSearcher(solrUrl, coreName);
         
     	ResourceConfig rc = new ResourceConfig()
 			.packages( "dbpedia.lookup.server" )
