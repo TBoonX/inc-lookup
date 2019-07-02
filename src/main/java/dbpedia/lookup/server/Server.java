@@ -27,8 +27,7 @@ public class Server
 			.registerInstances(new LookupSearcherResolver(searcher));
     	
     	System.out.println("Starting Lookup Service..");
-    	HttpServer server = JdkHttpServerFactory.createHttpServer( 
-	    URI.create( "http://localhost:8080/api" ), rc );
+    	HttpServer server = JdkHttpServerFactory.createHttpServer(URI.create( "http://localhost:8080/api" ), rc);
     	System.out.println("Lookup Service running.");
     	
     	Scanner scan = new Scanner(System.in);

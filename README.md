@@ -5,6 +5,26 @@
 - different datasets can be added sequentially, reindexing of single datasets is problemantic however
 - currently indexes labels and keeps track of the incoming links to a resource.
 
+## helpful info
+
+When opening in eclipse and having OpenJDK, then set Java BuildPath - Modulpath - JRE version to JavaSE-1.6
+
+run
+```
+mvn install -DskipTests
+```
+before starting the server.
+
+If you see the error "no segment* file found" then just run it again or copy everything form lookupIndex to tmp.
+
+Blank nodes are not supported!
+
+If there are errors like: Not found java.nio.file.Path or File.toPath() not existing, then run
+```
+mvn clean
+mvn install -DskipTests
+```
+
 ## Example Result (WIP)
 
 ```{
@@ -227,8 +247,11 @@ http://localhost:8081/api/search?query=Billlo
 
 ``` 
 mvn exec:java -Dexec.mainClass="dbpedia.lookup.indexing.App" 
+```
+Creates the index.
 
+```
 mvn exec:java -Dexec.mainClass="dbpedia.lookup.server.Server" 
 
-
 ````
+Starts a server on http://localhost:8080/api which does not respond.

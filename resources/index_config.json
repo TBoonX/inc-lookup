@@ -7,7 +7,8 @@
 			"?s <http://www.w3.org/ns/dcat#distribution> ?dist.",
 			"?dist <http://www.w3.org/ns/dcat#downloadURL> ?dl.",
 			"FILTER regex(?dist, 'labels-2018.11.20_enwiki'). }"
-		]
+		],
+		"filePath" : "catalog.all.ttl"
 	},
 
 	"index" : {
@@ -15,8 +16,8 @@
 		"cacheSize" : 1000000,
 		"commitInterval" : 100000,
 		"fields" : [
-			{ "name" : "label", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#label", "http://xmlns.com/foaf/0.1/name" ] },
-			{ "name" : "description", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#comment", "http://dbpedia.org/ontology/abstract" ] }
+			{ "name" : "label", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#label", "http://purl.org/dc/terms/title" ] },
+			{ "name" : "description", "uris" : [ "http://www.w3.org/2000/01/rdf-schema#comment", "http://purl.org/dc/terms/description" ] }
 		]
 	},
 
